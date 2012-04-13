@@ -13,6 +13,7 @@ requires = [
     "js.jquery",
     "js.jqueryui",
     "js.tinymce",
+    "js.bootstrap",
 ]
 
 tests_require = [

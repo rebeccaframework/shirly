@@ -4,10 +4,11 @@ from pyramid.security import remember, forget
 from pyramid.httpexceptions import HTTPFound
 from pyramid_simpleform import Form
 from pyramid_simpleform.renderers import FormRenderer
-from .security import authenticate
-from . import schemas as s
 from js.tinymce import tinymce
 from js.jquery import jquery
+from js.bootstrap import bootstrap
+from .security import authenticate
+from . import schemas as s
 from . import models as m
 
 @view_config(route_name='top', permission="viewer", renderer="shirly:templates/index.mak")
@@ -49,6 +50,7 @@ class LoginView(object):
         
         return dict()
 
+@view_defaults(permission="viewer")
 class ProjectView(object):
     def __init__(self, request):
         self.request = request
@@ -69,6 +71,7 @@ class ProjectView(object):
             description=project.description,
             members=[dict(id=u.id, user_name=u.user_name) for u in project.users])
 
+@view_defaults(permission="viewer")
 class ProjectFormView(object):
     def __init__(self, request):
         self.request = request

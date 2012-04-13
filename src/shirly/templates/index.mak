@@ -1,13 +1,21 @@
-<h1>Shirly</h1>
-${request.authenticated_user.user_name}
-<a href="${request.route_url('logout')}">Logout</a>
-<a href="${request.route_url('new_project')}">New Project</a>
+<%inherit file="base.mak" />
+<div class="row">
 
-<div>
-<h2>Projects</h2>
-<ul>
+<div class="span4">
+<h2><a href="${request.route_url('projects')}">Projects</a></h2>
+<ul class="nav">
 %for project in projects:
 <li><a href="${request.route_url('project', project_name=project['project_name'])}">${project['project_name']}</a></li>
 %endfor
 </ul>
+</div>
+
+<div class="span4">
+<h2>Tickets</h2>
+</div>
+
+<div class="span4">
+<h2>Milestones</h2>
+</div>
+
 </div>
