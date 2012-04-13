@@ -14,11 +14,11 @@ def includeme(config):
     config.set_authorization_policy(authorization_policy)
     config.set_authentication_policy(authentication_policy)
 
-    config.add_tween('shirly.security.tween_factory')
+    config.add_tween('shirly.security.who_api_tween_factory')
 
     config.set_request_property(authenticated_user, 'authenticated_user')
 
-def tween_factory(handler, registry):
+def who_api_tween_factory(handler, registry):
     api_factory = registry.getUtility(IAPIFactory)
     def who_api_tween(request):
         api_factory(request.environ)
@@ -28,8 +28,6 @@ def tween_factory(handler, registry):
 def authenticate(request):
     who_api = get_who_api(request.environ)
     identity, headers = who_api.login({'login': request.params['login'], 'password': request.params['password']})
-    logging.debug('logged in %s' % identity)
-    logging.debug('headers in %s' % headers)
     return identity.get('repoze.who.userid')
 
 def authenticated_user(request):
