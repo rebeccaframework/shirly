@@ -69,7 +69,70 @@ class ProjectView(object):
         return dict(id=project.id,
             project_name=project.project_name,
             description=project.description,
-            members=[dict(id=u.id, user_name=u.user_name) for u in project.users])
+            members=[dict(id=u.id, user_name=u.user_name) 
+                for u in project.users],
+            tickets=[dict(ticket_no=t.ticket_no, ticket_name=t.ticket_name) 
+                for t in project.tickets.values()])
+
+@view_defaults(permission="viewer")
+class TicketView(object):
+    def __init__(self, request):
+        self.request = request
+        self.context = request.context
+
+    @view_config(route_name="project_tickets", renderer="shirly:templates/tickets.mak")
+    def collection_get(self):
+        project = self.context.query_project().filter_by(project_name=self.request.matchdict['project_name']).one()
+        logging.debug(project.tickets)
+        return dict(project_name=project.project_name,
+            tickets=[dict(ticket_no=t.ticket_no,
+            ticket_name=t.ticket_name,
+            description=t.description) 
+            for t in project.tickets.values()])
+
+    @view_config(route_name="project_ticket", renderer="shirly:templates/ticket.mak")
+    def member_get(self):
+        project = self.context.query_project().filter_by(project_name=self.request.matchdict['project_name']).one()
+        ticket_no = int(self.request.matchdict['ticket_no'])
+        t = project.tickets[ticket_no]
+        return dict(project_name=project.project_name,
+            ticket_no=t.ticket_no,
+            ticket_name=t.ticket_name,
+            description=t.description)
+
+@view_defaults(permission="viewer")
+class TicketFormView(object):
+    def __init__(self, request):
+        self.request = request
+        self.context = self.request.context
+        jquery.need()
+        tinymce.need()
+
+    @view_config(route_name='project_new_ticket', request_method="GET", renderer="shirly:templates/new_ticket.mak")
+    def get(self):
+        project = self.context.query_project().filter_by(project_name=self.request.matchdict['project_name']).one()
+
+        form = Form(self.request, schema=s.NewTicketSchema)
+        members = [dict(id=m.id, user_name=m.user_name) for m in project.users]
+        return dict(renderer=FormRenderer(form),
+            project_name=project.project_name,
+            project_id=project.id,
+            members=members)
+
+
+    @view_config(route_name='project_new_ticket', request_method="POST", renderer="shirly:templates/new_ticket.mak")
+    def post(self):
+        project = self.context.query_project().filter_by(project_name=self.request.matchdict['project_name']).one()
+        form = Form(self.request, schema=s.NewTicketSchema)
+        if form.validate():
+            ticket = form.bind(m.Ticket())
+            project.add_ticket(ticket)
+            return HTTPFound(location=self.request.route_url('project_ticket', project_name=project.project_name, ticket_no=ticket.ticket_no))
+        members = [dict(id=u.id, user_name=u.user_name) for u in project.users]
+        return dict(renderer=FormRenderer(form),
+            project_name=project.project_name,
+            project_id=project.id,
+            members=members)
 
 @view_defaults(permission="viewer")
 class ProjectFormView(object):

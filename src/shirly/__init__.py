@@ -14,5 +14,8 @@ def main(global_config, **settings):
     config.add_route('projects', '/projects')
     config.add_route('new_project', '/projects;new')
     config.add_route('project', '/projects/{project_name}')
+    config.add_route('project_tickets', '/projects/{project_name}/tickets')
+    config.add_route('project_new_ticket', '/projects/{project_name}/tickets;new')
+    config.add_route('project_ticket', '/projects/{project_name}/tickets/{ticket_no}')
     config.scan()
     return config.make_wsgi_app()

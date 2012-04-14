@@ -3,6 +3,7 @@ import sqlahelper
 import sqlalchemy as sa
 import sqlalchemy.orm as orm
 import sqlalchemy.sql as sql
+from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy.ext.associationproxy import association_proxy
 from pyramid.security import Everyone, Allow, Authenticated
 
@@ -52,9 +53,21 @@ class Project(Base):
     id = sa.Column(sa.Integer, primary_key=True)
     project_name = sa.Column(sa.Unicode(255), unique=True)
     description = sa.Column(sa.UnicodeText)
+    ticket_counter = sa.Column(sa.Integer, default=0)
 
     users = association_proxy('members', 'user',
         creator=lambda user: Member(user=user))
+
+    tickets = orm.relation('Ticket', backref='project', collection_class=attribute_mapped_collection('ticket_no'))
+
+    def gen_ticket_no(self):
+        self.ticket_counter += 1
+        return self.ticket_counter
+
+    def add_ticket(self, ticket):
+        ticket.ticket_no = self.gen_ticket_no()
+        self.tickets[ticket.ticket_no] = ticket
+        return ticket
 
 class Member(Base):
     __tablename__ = 'members'
@@ -69,3 +82,15 @@ class Member(Base):
     def user_name(self):
         return self.user.user_name
 
+class Ticket(Base):
+    __tablename__ = 'tickets'
+    id = sa.Column(sa.Integer, primary_key=True)
+    project_id = sa.Column(sa.Integer, sa.ForeignKey('projects.id'))
+    member_id = sa.Column(sa.Integer, sa.ForeignKey('members.id'))
+
+    user = orm.relation('Member', backref='tickets')
+
+    ticket_no = sa.Column(sa.Integer)
+    ticket_name = sa.Column(sa.Unicode(255))
+    description = sa.Column(sa.UnicodeText)
+    estimated_time = sa.Column(sa.Integer)
