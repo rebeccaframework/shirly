@@ -1,5 +1,7 @@
 from webhelpers.html.builder import *
 from webhelpers.html.tags import *
+from pyramid.view import render_view_to_response
+
 def breadcrumb(seq):
     if len(seq) == 0:
         return ""
@@ -15,3 +17,12 @@ def breadcrumb(seq):
     html.append('<li class="active">%s</li>' % seq[-1])
     html.append('</ul>')
     return literal("".join(html))
+
+def member_list(request):
+    res = render_view_to_response(request.context, request, name='member_list')
+    return res.text
+
+def ticket_list(request):
+    res = render_view_to_response(request.context, request, name='ticket_list')
+    return res.text
+    

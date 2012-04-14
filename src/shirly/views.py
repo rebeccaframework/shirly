@@ -27,6 +27,7 @@ def logout(request):
     redirect.headerlist.extend(headers)
     return redirect
 
+
 class LoginView(object):
     def __init__(self, request):
         self.request = request

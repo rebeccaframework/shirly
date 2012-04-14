@@ -1,9 +1,16 @@
-<%inherit file="base.mak" />
+<%inherit file="layout.mak" />
 <%block name="extra_scripts">
 <script>
 $(function() {tinyMCE.init({mode: 'textareas', theme: 'advanced'});})
 </script>
 </%block>
+<%block name="breadcrumb">
+${h.breadcrumb([
+(request.route_url('top'), 'TOP'),
+'New Project',
+])}
+</%block>
+
 ${renderer.errorlist()}
 ${renderer.begin(request.route_url('new_project'), class_="form-horizontal")}
 <fieldset>

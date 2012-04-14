@@ -1,8 +1,10 @@
-<%inherit file="base.mak" />
+<%inherit file="layout.mak" />
+<%block name="breadcrumb">
 ${h.breadcrumb([
 (request.route_url('top'), 'TOP'),
 'Projects',
 ])}
+</%block>
 
 <ul class="nav">
 %for p in projects:

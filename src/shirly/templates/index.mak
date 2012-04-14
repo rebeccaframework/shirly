@@ -1,7 +1,9 @@
-<%inherit file="base.mak" />
+<%inherit file="layout.mak" />
+<%block name="breadcrumb">
 ${h.breadcrumb([
 'TOP',
 ])}
+</%block>
 
 <div class="row">
 

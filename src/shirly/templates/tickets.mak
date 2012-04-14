@@ -1,14 +1,12 @@
-<%inherit file="base.mak" />
-
+<%inherit file="project_layout.mak" />
+<%block name="breadcrumb">
 ${h.breadcrumb([(request.route_url('top'), 'TOP'), 
     (request.route_url('projects'), 'Projects'), 
     (request.route_url('project', project_name=project_name), project_name), 
     'Tickets'])}
+</%block>
 
-<div class="span3">
-</div>
-<div class="span9">
-<h2>Tickts</h2>
+<h2>Tickets</h2>
 <a class="btn btn-primary" href="${request.route_url('project_new_ticket', project_name=project_name)}"><i class="icon-edit"></i>new</a>
 
 <table class="table table-striped">
@@ -27,4 +25,3 @@ ${h.breadcrumb([(request.route_url('top'), 'TOP'),
 </tbody>
 %endfor
 </table>
-</div>

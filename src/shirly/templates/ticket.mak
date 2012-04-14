@@ -1,4 +1,5 @@
-<%inherit file="base.mak" />
+<%inherit file="project_layout.mak" />
+<%block name="breadcrumb">
 ${h.breadcrumb([
 (request.route_url('top'), 'TOP'),
 (request.route_url('projects'), 'Projects'),
@@ -6,6 +7,7 @@ ${h.breadcrumb([
 (request.route_url('project_tickets', project_name=project_name), 'Tickets'),
 "%s&nbsp;%s" % (ticket_no, ticket_name),
 ])}
+</%block>
 
 <h1>#${ticket_no} ${ticket_name}</h1>
 <div>
