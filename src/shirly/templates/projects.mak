@@ -1,8 +1,8 @@
 <%inherit file="base.mak" />
-<ul class="breadcrumb">
-<li><a href="${request.route_url('top')}">Top</a><span class="divider">/</span></li>
-<li class="active">Projects</li>
-</ul>
+${h.breadcrumb([
+(request.route_url('top'), 'TOP'),
+'Projects',
+])}
 
 <ul class="nav">
 %for p in projects:

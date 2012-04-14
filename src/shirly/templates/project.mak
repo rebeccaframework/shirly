@@ -1,9 +1,9 @@
 <%inherit file="base.mak" />
-<ul class="breadcrumb">
-<li><a href="${request.route_url('top')}">Top</a><span class="divider">/</span></li>
-<li><a href="${request.route_url('projects')}">Projects</a><span class="divider">/</span></li>
-<li class="active">${project_name}</li>
-</ul>
+${h.breadcrumb([
+(request.route_url('top'), 'TOP'),
+(request.route_url('projects'), 'Projects'),
+project_name,
+])}
 
 <div class="row">
 <div class="span3">

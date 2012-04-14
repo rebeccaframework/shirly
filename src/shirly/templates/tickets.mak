@@ -1,10 +1,9 @@
 <%inherit file="base.mak" />
-<ul class="breadcrumb">
-<li><a href="${request.route_url('top')}">Top</a><span class="divider">/</span></li>
-<li><a href="${request.route_url('projects')}">Projects</a><span class="divider">/</span></li>
-<li><a href="${request.route_url('project', project_name=project_name)}">${project_name}</a><span class="divider">/</span></li>
-<li class="active">Tickets</li>
-</ul>
+
+${h.breadcrumb([(request.route_url('top'), 'TOP'), 
+    (request.route_url('projects'), 'Projects'), 
+    (request.route_url('project', project_name=project_name), project_name), 
+    'Tickets'])}
 
 <div class="span3">
 </div>
@@ -13,15 +12,19 @@
 <a class="btn btn-primary" href="${request.route_url('project_new_ticket', project_name=project_name)}"><i class="icon-edit"></i>new</a>
 
 <table class="table table-striped">
+<thead>
 <tr>
 <th>#</th>
 <th>Name</th>
 </tr>
+</thead>
+<tbody>
 %for t in tickets:
 <tr>
 <td><a href="${request.route_url('project_ticket', project_name=project_name, ticket_no=t['ticket_no'])}">${t['ticket_no']}</a></td>
 <td><a href="${request.route_url('project_ticket', project_name=project_name, ticket_no=t['ticket_no'])}">${t['ticket_name']}</a></td>
 </tr>
+</tbody>
 %endfor
 </table>
 </div>

@@ -3,9 +3,11 @@ import sqlahelper
 import sqlalchemy as sa
 import sqlalchemy.orm as orm
 import sqlalchemy.sql as sql
+from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy.ext.associationproxy import association_proxy
 from pyramid.security import Everyone, Allow, Authenticated
+from pyramid.decorator import reify
 
 class ShirlyResource(object):
     __acl__ = [
@@ -25,6 +27,30 @@ class ShirlyResource(object):
 
     def add_project(self, project):
         return DBSession.add(project)
+
+    @reify
+    def project(self):
+        if 'project_name' not in self.request.matchdict:
+            return None
+        try:
+            project = self.query_project().filter_by(project_name=self.request.matchdict['project_name']).one()
+            return project
+        except NoResultFound:
+            return None
+
+    @reify
+    def ticket_no(self):
+        if 'ticket_no' not in self.request.matchdict:
+            return None
+        return int(self.request.matchdict['ticket_no'])
+
+    @reify
+    def ticket(self):
+        project = self.project
+        if project is None:
+            return None
+        ticket_no = self.ticket_no
+        return project.tickets.get(ticket_no)
 
 Base = sqlahelper.get_base()
 DBSession = sqlahelper.get_session()

@@ -1,4 +1,8 @@
 <%inherit file="base.mak" />
+${h.breadcrumb([
+'TOP',
+])}
+
 <div class="row">
 
 <div class="span4">
