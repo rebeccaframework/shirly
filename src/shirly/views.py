@@ -89,6 +89,7 @@ class TicketView(object):
             tickets=[dict(ticket_no=t.ticket_no,
             ticket_name=t.ticket_name,
             status=t.status,
+            owner_name=t.owner_name,
             reporter_name=t.reporter_name,
             description=t.description) 
             for t in project.tickets.values()])
@@ -99,21 +100,47 @@ class TicketView(object):
         t = self.context.ticket
 
         return dict(project_name=project.project_name,
+            members=[(u.id, u.user_name) for u in project.users.values()],
             ticket_no=t.ticket_no,
             ticket_name=t.ticket_name,
             reporter_name=t.reporter_name,
             status=t.status,
+            owner_name=t.owner_name,
             description=t.description,
             reporter=t.reporter)
 
-    @view_config(route_name="project_ticket", request_method="POST")
-    def member_post(self):
+
+    @view_config(route_name="project_ticket", request_method="POST", request_param="operation=Reopen")
+    def reopen_ticket(self):
         t = self.context.ticket
-        new_status = self.request.params['status']
-        if new_status == "finished":
-            t.finish()
-        if new_status == "closed":
-            t.close()
+        t.reopen()
+        return HTTPFound(location=self.request.url)
+
+    @view_config(route_name="project_ticket", request_method="POST", request_param="operation=Finish")
+    def finish_ticket(self):
+        t = self.context.ticket
+        t.finish()
+        return HTTPFound(location=self.request.url)
+
+    @view_config(route_name="project_ticket", request_method="POST", request_param="operation=Close")
+    def close_ticket(self):
+        t = self.context.ticket
+        t.close()
+        return HTTPFound(location=self.request.url)
+
+    @view_config(route_name="project_ticket", request_method="POST", request_param="operation=Assign")
+    def assign_ticket(self):
+        project = self.context.project
+        owner_id = int(self.request.params['owner'])
+        member = project.members[owner_id]
+        t = self.context.ticket
+        t.assign(member)
+        return HTTPFound(location=self.request.url)
+
+    @view_config(route_name="project_ticket", request_method="POST", request_param="operation=Accept")
+    def accept_ticket(self):
+        t = self.context.ticket
+        t.accept()
         return HTTPFound(location=self.request.url)
 
 @view_defaults(permission="viewer")

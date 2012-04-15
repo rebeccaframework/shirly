@@ -5,7 +5,7 @@ def memeber_list(request):
     project = request.context.project
     return dict(members=[
         dict(id=u.id, user_name=u.user_name)
-        for u in project.users
+        for u in project.users.values()
         ])
 
 

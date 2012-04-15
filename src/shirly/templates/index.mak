@@ -33,6 +33,14 @@ ${t.ticket_name}</a>
 </div>
 <h3>Owned</h3>
 <div class="well">
+<ul class="nav">
+%for t in request.authenticated_user.owned_tickets:
+<li>
+<a href="${request.route_url('project_ticket', project_name=t.project.project_name, ticket_no=t.ticket_no)}">
+${t.ticket_name}</a>
+</li>
+</ul>
+%endfor
 </div>
 </div>
 

@@ -104,6 +104,7 @@ class Project(Base):
         creator=lambda user: Member(user=user))
 
     tickets = orm.relation('Ticket', backref='project', collection_class=attribute_mapped_collection('ticket_no'))
+    members = orm.relation('Member', backref='project', collection_class=attribute_mapped_collection('user_id'))
 
     def gen_ticket_no(self):
         self.ticket_counter += 1
@@ -114,6 +115,7 @@ class Project(Base):
         self.tickets[ticket.ticket_no] = ticket
         return ticket
 
+
 class Member(Base):
     __tablename__ = 'members'
     query = DBSession.query_property()
@@ -121,8 +123,11 @@ class Member(Base):
     project_id = sa.Column(sa.Integer, sa.ForeignKey('projects.id'))
     user_id = sa.Column(sa.Integer, sa.ForeignKey('users.id'))
 
-    project = orm.relation('Project', backref='members')
     user = orm.relation('User', backref='members')
+
+    @classmethod
+    def by_user_id(cls, user_id):
+        return cls.query.filter(cls.user_id==user_id).one()
 
     @property
     def user_name(self):
@@ -144,12 +149,27 @@ class Ticket(Base):
             return None
         return self.reporter.user_name
 
+    @property
+    def owner_name(self):
+        if self.owner is None:
+            return None
+        return self.owner.user_name
     ticket_no = sa.Column(sa.Integer)
     ticket_name = sa.Column(sa.Unicode(255))
     description = sa.Column(sa.UnicodeText)
     estimated_time = sa.Column(sa.Integer)
 
     status = sa.Column(sa.Enum('new', 'assigned', 'accepted', 'finished', 'closed'), default='new')
+
+    def reopen(self):
+        self.status = "new"
+
+    def assign(self, member):
+        self.owner = member
+        self.status = "assigned"
+
+    def accept(self):
+        self.status = "accepted"
 
     def finish(self):
         self.status = 'finished'
