@@ -24,14 +24,6 @@ ${h.breadcrumb([
 ${description|n}
 </div>
 <div>
-<form action="${request.url}" method="POST">
-<input type="hidden" name="status" value="finished" />
-<button type="submit">Finish</button>
-</form>
-<form action="${request.url}" method="POST">
-<input type="hidden" name="status" value="closed" />
-<button type="submit">Close</button>
-</form>
 
 <form action="${request.url}" method="POST">
 <fieldset>

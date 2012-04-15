@@ -4,6 +4,7 @@
 <div class="span3">
 ${h.member_list(request)|n}
 ${h.ticket_list(request)|n}
+${h.milestone_list(request)|n}
 <%block name="sidemenu">
 </%block>
 </div>

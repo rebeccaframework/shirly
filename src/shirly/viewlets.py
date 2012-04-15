@@ -17,3 +17,12 @@ def projects(request):
         for t in project.tickets.values()
         ], 
         project_name=project.project_name)
+
+@view_config(context='.models.ShirlyResource', name="milestone_list", renderer="shirly:templates/viewlets/milestone_list.mak")
+def milestone_list(request):
+    project = request.context.project
+    return dict(milestones=[
+        dict(id=m.id, milestone_name=m.milestone_name, due_date=m.due_date)
+        for m in project.milestones
+        ], 
+        project_name=project.project_name)

@@ -26,3 +26,6 @@ def ticket_list(request):
     res = render_view_to_response(request.context, request, name='ticket_list')
     return res.text
     
+def milestone_list(request):
+    res = render_view_to_response(request.context, request, name='milestone_list')
+    return res.text

@@ -100,8 +100,7 @@ class Project(Base):
     description = sa.Column(sa.UnicodeText)
     ticket_counter = sa.Column(sa.Integer, default=0)
 
-    users = association_proxy('members', 'user',
-        creator=lambda user: Member(user=user))
+    users = association_proxy('members', 'user')
 
     tickets = orm.relation('Ticket', backref='project', collection_class=attribute_mapped_collection('ticket_no'))
     members = orm.relation('Member', backref='project', collection_class=attribute_mapped_collection('user_id'))
@@ -114,6 +113,9 @@ class Project(Base):
         ticket.ticket_no = self.gen_ticket_no()
         self.tickets[ticket.ticket_no] = ticket
         return ticket
+
+    def add_milestone(self, milestone):
+        self.milestones.append(milestone)
 
 
 class Member(Base):
@@ -136,12 +138,23 @@ class Member(Base):
 class Ticket(Base):
     __tablename__ = 'tickets'
     id = sa.Column(sa.Integer, primary_key=True)
+
+    ticket_no = sa.Column(sa.Integer)
+    ticket_name = sa.Column(sa.Unicode(255))
+    description = sa.Column(sa.UnicodeText)
+    estimated_time = sa.Column(sa.Integer)
+
     project_id = sa.Column(sa.Integer, sa.ForeignKey('projects.id'))
     reporter_member_id = sa.Column(sa.Integer, sa.ForeignKey('members.id'))
     owner_member_id = sa.Column(sa.Integer, sa.ForeignKey('members.id'))
 
+    milestone_id = sa.Column(sa.Integer, sa.ForeignKey('milestones.id'))
+    milestone = orm.relation('Milestone', backref='tickets')
+
     reporter = orm.relation('Member', backref='reported_tickets', primaryjoin="Ticket.reporter_member_id==Member.id")
     owner = orm.relation('Member', backref='owned_tickets', primaryjoin="Ticket.owner_member_id==Member.id")
+
+    status = sa.Column(sa.Enum('new', 'assigned', 'accepted', 'finished', 'closed'), default='new')
 
     @property
     def reporter_name(self):
@@ -154,12 +167,7 @@ class Ticket(Base):
         if self.owner is None:
             return None
         return self.owner.user_name
-    ticket_no = sa.Column(sa.Integer)
-    ticket_name = sa.Column(sa.Unicode(255))
-    description = sa.Column(sa.UnicodeText)
-    estimated_time = sa.Column(sa.Integer)
 
-    status = sa.Column(sa.Enum('new', 'assigned', 'accepted', 'finished', 'closed'), default='new')
 
     def reopen(self):
         self.status = "new"
@@ -188,3 +196,16 @@ class Ticket(Base):
     @hybrid_property
     def is_active(self):
         return self.status != "closed"
+
+class Milestone(Base):
+    __tablename__ = 'milestones'
+    query = DBSession.query_property()
+
+    id = sa.Column(sa.Integer, primary_key=True)
+    milestone_name = sa.Column(sa.Unicode(255))
+    due_date = sa.Column(sa.DateTime)
+    description = sa.Column(sa.UnicodeText)
+
+    project_id = sa.Column(sa.Integer, sa.ForeignKey('projects.id'))
+
+    project = orm.relation('Project', backref='milestones')

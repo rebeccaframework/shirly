@@ -26,7 +26,7 @@ ${h.breadcrumb([
 %for t in request.authenticated_user.reported_tickets:
 <li>
 <a href="${request.route_url('project_ticket', project_name=t.project.project_name, ticket_no=t.ticket_no)}">
-${t.ticket_name}</a>
+${t.ticket_name} ${t.project.project_name}</a>
 </li>
 </ul>
 %endfor
@@ -37,7 +37,7 @@ ${t.ticket_name}</a>
 %for t in request.authenticated_user.owned_tickets:
 <li>
 <a href="${request.route_url('project_ticket', project_name=t.project.project_name, ticket_no=t.ticket_no)}">
-${t.ticket_name}</a>
+${t.ticket_name} ${t.project.project_name}</a>
 </li>
 </ul>
 %endfor

@@ -6,6 +6,7 @@ from pyramid_simpleform import Form
 from pyramid_simpleform.renderers import FormRenderer
 from js.tinymce import tinymce
 from js.jquery import jquery
+from js.jqueryui import jqueryui
 from js.bootstrap import bootstrap
 from .security import authenticate
 from . import schemas as s
@@ -71,7 +72,7 @@ class ProjectView(object):
             project_name=project.project_name,
             description=project.description,
             members=[dict(id=u.id, user_name=u.user_name) 
-                for u in project.users],
+                for u in project.users.values()],
             tickets=[dict(ticket_no=t.ticket_no, ticket_name=t.ticket_name) 
                 for t in project.tickets.values()])
 
@@ -149,6 +150,7 @@ class TicketFormView(object):
         self.request = request
         self.context = self.request.context
         jquery.need()
+        jqueryui.need()
         tinymce.need()
 
     @view_config(route_name='project_new_ticket', request_method="GET", renderer="shirly:templates/new_ticket.mak")
@@ -156,7 +158,7 @@ class TicketFormView(object):
         project = self.context.project
 
         form = Form(self.request, schema=s.NewTicketSchema)
-        members = [dict(id=m.id, user_name=m.user_name) for m in project.users]
+        members = [dict(id=m.id, user_name=m.user_name) for m in project.users.values()]
         return dict(renderer=FormRenderer(form),
             project_name=project.project_name,
             project_id=project.id,
@@ -184,6 +186,7 @@ class ProjectFormView(object):
         self.request = request
         self.context = request.context
         jquery.need()
+        jqueryui.need()
         tinymce.need()
 
     @view_config(route_name='new_project', renderer='shirly:templates/new_project.mak', request_method="GET")
@@ -200,9 +203,58 @@ class ProjectFormView(object):
             project = form.bind(m.Project())
             users = self.context.query_users(in_=self.request.POST.getall('member'))
             for u in users:
-                project.users.append(u)
+                project.members[u.id] = m.Member(user=u)
             self.context.add_project(project)
             return HTTPFound('/')
         users = self.conext.query_users().all()
         return dict(renderer=FormRenderer(form),
             users=[(u.id, u.user_name) for u in users])
+
+@view_defaults(permission="viewer")
+class MilestoneView(object):
+    def __init__(self, request):
+        self.request = request
+        self.context = self.request.context
+
+    @view_config(route_name='project_milestones', renderer='shirly:templates/milestones.mak', request_method="GET")
+    def collection_get(self):
+        project = self.context.project
+        milestones = project.milestones
+        return dict(project_name=project.project_name,
+            milestones=[
+                dict(id=m.id, milestone_name=m.milestone_name, description=m.description, due_date=m.due_date,
+                    ticket_count=len(m.tickets))
+                for m in milestones
+            ])
+
+@view_defaults(permission="viewer")
+class MilestoneFormView(object):
+    def __init__(self, request):
+        self.request = request
+        self.context = self.request.context
+        jquery.need()
+        jqueryui.need()
+        tinymce.need()
+
+    @view_config(route_name='project_new_milestone', request_method="GET", renderer="shirly:templates/new_milestone.mak")
+    def get(self):
+        project = self.context.project
+
+        form = Form(self.request, schema=s.NewMilestoneSchema)
+        return dict(renderer=FormRenderer(form),
+            project_name=project.project_name,
+            project_id=project.id)
+
+
+    @view_config(route_name='project_new_milestone', request_method="POST", renderer="shirly:templates/new_milestone.mak")
+    def post(self):
+        project = self.context.project
+        form = Form(self.request, schema=s.NewMilestoneSchema)
+        if form.validate():
+            milestone = form.bind(m.Milestone())
+            project.add_milestone(milestone)
+            return HTTPFound(location=self.request.route_url('project_milestones', project_name=project.project_name))
+        return dict(renderer=FormRenderer(form),
+            project_name=project.project_name,
+            project_id=project.id,
+            )
