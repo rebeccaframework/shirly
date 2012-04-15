@@ -6,6 +6,7 @@ import sqlalchemy.sql as sql
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from pyramid.security import Everyone, Allow, Authenticated
 from pyramid.decorator import reify
 
@@ -52,6 +53,16 @@ class ShirlyResource(object):
         ticket_no = self.ticket_no
         return project.tickets.get(ticket_no)
 
+    @reify
+    def member(self):
+        project = self.project
+        if project is None:
+            return None
+        authenticated_user = self.request.authenticated_user
+        if authenticated_user is None:
+            return None
+
+        return Member.query.filter(Member.user==authenticated_user).filter(Member.project==project).one()
 Base = sqlahelper.get_base()
 DBSession = sqlahelper.get_session()
 
@@ -71,6 +82,14 @@ class User(Base):
         return self._password == hashlib.sha1(password).hexdigest()
 
     projects = association_proxy('members', 'project')
+
+    @property
+    def owned_tickets(self):
+        return DBSession.query(Ticket).filter(Ticket.owner_member_id==Member.id).filter(Member.user_id==self.id).filter(Ticket.is_active).all()
+
+    @property
+    def reported_tickets(self):
+        return DBSession.query(Ticket).filter(Ticket.reporter_member_id==Member.id).filter(Member.user_id==self.id).filter(Ticket.is_active).all()
 
 class Project(Base):
     __tablename__ = 'projects'
@@ -97,6 +116,7 @@ class Project(Base):
 
 class Member(Base):
     __tablename__ = 'members'
+    query = DBSession.query_property()
     id = sa.Column(sa.Integer, primary_key=True)
     project_id = sa.Column(sa.Integer, sa.ForeignKey('projects.id'))
     user_id = sa.Column(sa.Integer, sa.ForeignKey('users.id'))
@@ -112,11 +132,39 @@ class Ticket(Base):
     __tablename__ = 'tickets'
     id = sa.Column(sa.Integer, primary_key=True)
     project_id = sa.Column(sa.Integer, sa.ForeignKey('projects.id'))
-    member_id = sa.Column(sa.Integer, sa.ForeignKey('members.id'))
+    reporter_member_id = sa.Column(sa.Integer, sa.ForeignKey('members.id'))
+    owner_member_id = sa.Column(sa.Integer, sa.ForeignKey('members.id'))
 
-    user = orm.relation('Member', backref='tickets')
+    reporter = orm.relation('Member', backref='reported_tickets', primaryjoin="Ticket.reporter_member_id==Member.id")
+    owner = orm.relation('Member', backref='owned_tickets', primaryjoin="Ticket.owner_member_id==Member.id")
+
+    @property
+    def reporter_name(self):
+        if self.reporter is None:
+            return None
+        return self.reporter.user_name
 
     ticket_no = sa.Column(sa.Integer)
     ticket_name = sa.Column(sa.Unicode(255))
     description = sa.Column(sa.UnicodeText)
     estimated_time = sa.Column(sa.Integer)
+
+    status = sa.Column(sa.Enum('new', 'assigned', 'accepted', 'finished', 'closed'), default='new')
+
+    def finish(self):
+        self.status = 'finished'
+
+    @hybrid_property
+    def is_finished(self):
+        return self.status == 'finished'
+
+    def close(self):
+        self.status = "closed"
+
+    @hybrid_property
+    def is_closed(self):
+        return self.status == "closed"
+
+    @hybrid_property
+    def is_active(self):
+        return self.status != "closed"

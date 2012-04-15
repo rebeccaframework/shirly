@@ -88,10 +88,12 @@ class TicketView(object):
         return dict(project_name=project.project_name,
             tickets=[dict(ticket_no=t.ticket_no,
             ticket_name=t.ticket_name,
+            status=t.status,
+            reporter_name=t.reporter_name,
             description=t.description) 
             for t in project.tickets.values()])
 
-    @view_config(route_name="project_ticket", renderer="shirly:templates/ticket.mak")
+    @view_config(route_name="project_ticket", request_method="GET", renderer="shirly:templates/ticket.mak")
     def member_get(self):
         project = self.context.project
         t = self.context.ticket
@@ -99,7 +101,20 @@ class TicketView(object):
         return dict(project_name=project.project_name,
             ticket_no=t.ticket_no,
             ticket_name=t.ticket_name,
-            description=t.description)
+            reporter_name=t.reporter_name,
+            status=t.status,
+            description=t.description,
+            reporter=t.reporter)
+
+    @view_config(route_name="project_ticket", request_method="POST")
+    def member_post(self):
+        t = self.context.ticket
+        new_status = self.request.params['status']
+        if new_status == "finished":
+            t.finish()
+        if new_status == "closed":
+            t.close()
+        return HTTPFound(location=self.request.url)
 
 @view_defaults(permission="viewer")
 class TicketFormView(object):
@@ -127,6 +142,7 @@ class TicketFormView(object):
         form = Form(self.request, schema=s.NewTicketSchema)
         if form.validate():
             ticket = form.bind(m.Ticket())
+            ticket.reporter = self.context.member
             project.add_ticket(ticket)
             return HTTPFound(location=self.request.route_url('project_ticket', project_name=project.project_name, ticket_no=ticket.ticket_no))
         members = [dict(id=u.id, user_name=u.user_name) for u in project.users]

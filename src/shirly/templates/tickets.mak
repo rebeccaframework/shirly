@@ -14,6 +14,8 @@ ${h.breadcrumb([(request.route_url('top'), 'TOP'),
 <tr>
 <th>#</th>
 <th>Name</th>
+<th>Status</th>
+<th>Reporter</th>
 </tr>
 </thead>
 <tbody>
@@ -21,6 +23,8 @@ ${h.breadcrumb([(request.route_url('top'), 'TOP'),
 <tr>
 <td><a href="${request.route_url('project_ticket', project_name=project_name, ticket_no=t['ticket_no'])}">${t['ticket_no']}</a></td>
 <td><a href="${request.route_url('project_ticket', project_name=project_name, ticket_no=t['ticket_no'])}">${t['ticket_name']}</a></td>
+<td>${t['status']}</td>
+<td>${t['reporter_name']}</td>
 </tr>
 </tbody>
 %endfor
