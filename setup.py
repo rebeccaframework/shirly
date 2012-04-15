@@ -38,6 +38,7 @@ setup(
         "testing": tests_require,
         "docs": ["sphinx"],
         "dev": ["alembic"],
+        "mysql": ["pymysql"],
     },
     test_suite="shirly",
     package_dir={"": "src"},
