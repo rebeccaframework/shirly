@@ -1,27 +1,19 @@
-<%inherit file="base.mak" />
+<%inherit file="project_layout.mak" />
 <%block name="extra_scripts">
 <script>
 $(function() {tinyMCE.init({mode: 'textareas', theme: 'advanced'});})
 </script>
 </%block>
+<%block name="breadcrumb">
+${h.breadcrumb([
+(request.route_url('top'), "TOP"),
+(request.route_url('projects'), "Projects"),
+(request.route_url('project', project_name=project_name), project_name),
+"New Ticket",
+])}
+</%block>
 
-<ul class="breadcrumb">
-<li><a href="${request.route_url('top')}">Top</a><span class="divider">/</span></li>
-<li><a href="${request.route_url('projects')}">Projects</a><span class="divider">/</span></li>
-<li class="active">${project_name}</li>
-</ul>
 
-<div class="row">
-<div class="span4">
-<h2>Members</h2>
-<ul>
-%for m in members:
-<li>${m['user_name']}</li>
-%endfor
-</ul>
-</div>
-
-<div class="span8">
 ${renderer.errorlist()}
 ${renderer.begin(request.route_url('project_new_ticket', project_name=project_name), class_="form-horizontal")}
 <fieldset>
@@ -54,4 +46,3 @@ ${renderer.text('estimated_time')}
 </div>
 </fieldset>
 ${renderer.end()}
-</div>
