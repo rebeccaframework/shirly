@@ -117,6 +117,13 @@ class Project(Base):
     def add_milestone(self, milestone):
         self.milestones.append(milestone)
 
+    @property
+    def ticket_count(self):
+        return len(self.tickets)
+
+    @property
+    def active_ticket_count(self):
+        return Ticket.query.filter(Ticket.join_to(self)).filter(Ticket.is_active).count()
 
 class Member(Base):
     __tablename__ = 'members'
@@ -137,6 +144,7 @@ class Member(Base):
 
 class Ticket(Base):
     __tablename__ = 'tickets'
+    query = DBSession.query_property()
     id = sa.Column(sa.Integer, primary_key=True)
 
     ticket_no = sa.Column(sa.Integer)
@@ -196,6 +204,10 @@ class Ticket(Base):
     @hybrid_property
     def is_active(self):
         return self.status != "closed"
+
+    @hybrid_method
+    def join_to(self, project):
+        return self.project == project
 
 class Milestone(Base):
     __tablename__ = 'milestones'

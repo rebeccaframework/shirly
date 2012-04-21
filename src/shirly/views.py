@@ -61,8 +61,9 @@ class ProjectView(object):
     @view_config(route_name="projects", renderer="shirly:templates/projects.mak", request_method="GET")
     def collection_get(self):
         projects = self.context.query_project().all()
-        return dict(projects=[dict(id=project.id, project_name=project.project_name, description=project.description)
-            for project in projects])
+        #return dict(projects=[dict(id=project.id, project_name=project.project_name, description=project.description)
+        #    for project in projects])
+        return dict(projects=projects)
 
     @view_config(route_name="project", renderer="shirly:templates/project.mak", request_method="GET")
     def member_get(self):
@@ -85,15 +86,17 @@ class TicketView(object):
     @view_config(route_name="project_tickets", renderer="shirly:templates/tickets.mak")
     def collection_get(self):
         project = self.context.project
+        tickets = sorted(project.tickets.values(), key=lambda t: t.ticket_no)
         logging.debug(project.tickets)
-        return dict(project_name=project.project_name,
-            tickets=[dict(ticket_no=t.ticket_no,
-            ticket_name=t.ticket_name,
-            status=t.status,
-            owner_name=t.owner_name,
-            reporter_name=t.reporter_name,
-            description=t.description) 
-            for t in project.tickets.values()])
+        # return dict(project_name=project.project_name,
+        #     tickets=[dict(ticket_no=t.ticket_no,
+        #     ticket_name=t.ticket_name,
+        #     status=t.status,
+        #     owner_name=t.owner_name,
+        #     reporter_name=t.reporter_name,
+        #     description=t.description) 
+        #     for t in project.tickets.values()])
+        return dict(project=project, tickets=tickets)
 
     @view_config(route_name="project_ticket", request_method="GET", renderer="shirly:templates/ticket.mak")
     def member_get(self):

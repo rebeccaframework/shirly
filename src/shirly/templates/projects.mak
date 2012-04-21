@@ -6,10 +6,7 @@ ${h.breadcrumb([
 ])}
 </%block>
 
-<ul class="nav">
-%for p in projects:
-<li>
-<a href="${request.route_url('project', project_name=p['project_name'])}">${p['project_name']}</a>
-</li>
-%endfor
-</ul>
+${h.grid(request, 
+    [('Name', h.partial(h.link_to_project, request)),
+        ('Tickets', h.attrgetter('active_ticket_count')),
+        ], projects)}

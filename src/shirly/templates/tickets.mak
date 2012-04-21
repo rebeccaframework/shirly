@@ -2,32 +2,18 @@
 <%block name="breadcrumb">
 ${h.breadcrumb([(request.route_url('top'), 'TOP'), 
     (request.route_url('projects'), 'Projects'), 
-    (request.route_url('project', project_name=project_name), project_name), 
+    (request.route_url('project', project_name=project.project_name), project.project_name), 
     'Tickets'])}
 </%block>
 
 <h2>Tickets</h2>
-<a class="btn btn-primary" href="${request.route_url('project_new_ticket', project_name=project_name)}"><i class="icon-edit"></i>new</a>
+<a class="btn btn-primary" href="${request.route_url('project_new_ticket', project_name=project.project_name)}"><i class="icon-edit"></i>new</a>
 
-<table class="table table-striped">
-<thead>
-<tr>
-<th>#</th>
-<th>Name</th>
-<th>Status</th>
-<th>Owner</th>
-<th>Reporter</th>
-</tr>
-</thead>
-<tbody>
-%for t in tickets:
-<tr>
-<td><a href="${request.route_url('project_ticket', project_name=project_name, ticket_no=t['ticket_no'])}">${t['ticket_no']}</a></td>
-<td><a href="${request.route_url('project_ticket', project_name=project_name, ticket_no=t['ticket_no'])}">${t['ticket_name']}</a></td>
-<td>${t['status']}</td>
-<td>${t['owner_name']}</td>
-<td>${t['reporter_name']}</td>
-</tr>
-</tbody>
-%endfor
-</table>
+${h.grid(request,
+    [("#", h.attrgetter('ticket_no')),
+    ('Name', h.partial(h.link_to_ticket, request)),
+    ('Reporter', h.attrgetter('reporter_name')),
+    ('Owner', h.attrgetter('owner_name')),
+    ],
+    tickets,
+)}
