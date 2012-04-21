@@ -17,13 +17,23 @@ bootstrap.need()
 </div>
 
 <div class="container">
-<form method="POST" action="${request.route_url('login')}" class="form-inline">
+<form method="POST" action="${request.route_url('login')}" class="form-horizontal">
 <fieldset>
 <legend>Login</legend>
-<label for="login">User Name</label>
+
+<div class="control-group">
+<label for="login" class="control-label">User Name</label>
+<div class="controls">
 <input type="text" name="login" id="login" />
-<label for="password">Password</label>
+</div>
+</div>
+
+<div class="control-group">
+<label for="password" class="control-label">Password</label>
+<div class="controls">
 <input type="password" id="password" name="password" />
+</div>
+</div>
 <button type="submit" class="btn btn-primary">Login</button>
 </fieldset>
 </form>

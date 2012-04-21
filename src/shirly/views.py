@@ -3,7 +3,6 @@ from pyramid.view import view_config, view_defaults
 from pyramid.security import remember, forget
 from pyramid.httpexceptions import HTTPFound
 from pyramid_simpleform import Form
-from pyramid_simpleform.renderers import FormRenderer
 from js.tinymce import tinymce
 from js.jquery import jquery
 from js.jqueryui import jqueryui
@@ -11,6 +10,7 @@ from js.bootstrap import bootstrap
 from .security import authenticate
 from . import schemas as s
 from . import models as m
+from .forms import FormRenderer
 
 @view_config(route_name='top', permission="viewer", renderer="shirly:templates/index.mak")
 def index(request):

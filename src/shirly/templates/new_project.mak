@@ -16,19 +16,9 @@ ${renderer.begin(request.route_url('new_project'), class_="form-horizontal")}
 <fieldset>
 <legend>New Project</legend>
 
-<div class="control-group">
-${renderer.label('project_name', class_="control-label")}
-<div class="controls">
-${renderer.text('project_name')}
-</div>
-</div>
+${renderer.textfield('project_name')}
 
-<div class="control-group">
-${renderer.label('description', class_="control-label")}
-<div class="controls">
-${renderer.textarea('description')}
-</div>
-</div>
+${renderer.textareafield('description')}
 
 <div class="control-group">
 ${renderer.label('members', class_="control-label")}
