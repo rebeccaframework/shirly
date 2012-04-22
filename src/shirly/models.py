@@ -51,7 +51,7 @@ class ShirlyResource(object):
         if project is None:
             return None
         ticket_no = self.ticket_no
-        return project.tickets.get(ticket_no)
+        return project.get_ticket(ticket_no)
 
     @reify
     def member(self):
@@ -63,6 +63,7 @@ class ShirlyResource(object):
             return None
 
         return Member.query.filter(Member.user==authenticated_user).filter(Member.project==project).one()
+
 Base = sqlahelper.get_base()
 DBSession = sqlahelper.get_session()
 
@@ -85,11 +86,11 @@ class User(Base):
 
     @property
     def owned_tickets(self):
-        return DBSession.query(Ticket).filter(Ticket.owner_member_id==Member.id).filter(Member.user_id==self.id).filter(Ticket.is_active).all()
+        return Ticket.query.filter(Ticket.owner_member_id==Member.id).filter(Member.user_id==self.id).filter(Ticket.is_active).all()
 
     @property
     def reported_tickets(self):
-        return DBSession.query(Ticket).filter(Ticket.reporter_member_id==Member.id).filter(Member.user_id==self.id).filter(Ticket.is_active).all()
+        return Ticket.query.filter(Ticket.reporter_member_id==Member.id).filter(Member.user_id==self.id).filter(Ticket.is_active).all()
 
 class Project(Base):
     __tablename__ = 'projects'
@@ -116,6 +117,9 @@ class Project(Base):
 
     def add_milestone(self, milestone):
         self.milestones.append(milestone)
+
+    def get_ticket(self, ticket_no):
+        return self.tickets.get(ticket_no)
 
     @property
     def ticket_count(self):
