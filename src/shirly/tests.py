@@ -429,3 +429,154 @@ class MemberTests(unittest.TestCase):
         result = target.by_user_id(u.id)
 
         self.assertEqual(result, member)
+
+
+
+class ProjectUrlTests(unittest.TestCase):
+    def setUp(self):
+        self.config = testing.setUp()
+        self.config.include('shirly')
+
+    def tearDown(self):
+        testing.tearDown()
+
+    def _callFUT(self, *args, **kwargs):
+        from .helpers import project_url
+        return project_url(*args, **kwargs)
+
+    def test_it(self):
+        project = testing.DummyResource(project_name=u'test-project')
+        request = testing.DummyRequest()
+        result = self._callFUT(request, project)
+
+        self.assertEqual(result, 'http://example.com/projects/test-project')
+
+class LinkToProjectTests(unittest.TestCase):
+    def setUp(self):
+        self.config = testing.setUp()
+        self.config.include('shirly')
+
+    def tearDown(self):
+        testing.tearDown()
+
+    def _callFUT(self, *args, **kwargs):
+        from .helpers import link_to_project
+        return link_to_project(*args, **kwargs)
+
+    def test_it(self):
+        from webhelpers.html.builder import literal
+        project = testing.DummyResource(project_name=u'test-project')
+        request = testing.DummyRequest()
+        result = self._callFUT(request, project)
+
+        self.assertEqual(result, literal(u'<a href="http://example.com/projects/test-project">test-project</a>'))
+
+class TicketUrlTests(unittest.TestCase):
+    def setUp(self):
+        self.config = testing.setUp()
+        self.config.include('shirly')
+
+    def tearDown(self):
+        testing.tearDown()
+
+    def _callFUT(self, *args, **kwargs):
+        from .helpers import ticket_url
+        return ticket_url(*args, **kwargs)
+
+    def test_it(self):
+        project = testing.DummyResource(project_name=u'test-project')
+        ticket = testing.DummyResource(project=project, ticket_no=999)
+        request = testing.DummyRequest()
+        result = self._callFUT(request, ticket)
+
+        self.assertEqual(result, 'http://example.com/projects/test-project/tickets/999')
+
+class LinkToTicketTests(unittest.TestCase):
+    def setUp(self):
+        self.config = testing.setUp()
+        self.config.include('shirly')
+
+    def tearDown(self):
+        testing.tearDown()
+
+    def _callFUT(self, *args, **kwargs):
+        from .helpers import link_to_ticket
+        return link_to_ticket(*args, **kwargs)
+
+    def test_it(self):
+        from webhelpers.html.builder import literal
+        project = testing.DummyResource(project_name=u'test-project')
+        ticket = testing.DummyResource(project=project, ticket_no=999, ticket_name=u'test-ticket')
+        request = testing.DummyRequest()
+        result = self._callFUT(request, ticket)
+
+        self.assertEqual(result, literal(u'<a href="http://example.com/projects/test-project/tickets/999">test-ticket</a>'))
+
+class BreadCrumbTests(unittest.TestCase):
+    def _callFUT(self, *args, **kwargs):
+        from .helpers import breadcrumb
+        return breadcrumb(*args, **kwargs)
+
+    def test_empty(self):
+        result = self._callFUT([])
+        self.assertEqual(result, "")
+
+    def test_one(self):
+        from webhelpers.html.builder import literal
+        result = self._callFUT(["HOME"])
+        self.assertEqual(result, literal(u'<ul class="breadcrumb"><li class="active">HOME</li></ul>'))
+
+    def test_many(self):
+        from webhelpers.html.builder import literal
+        result = self._callFUT([("/", "HOME"), "Projects"])
+        self.assertEqual(result, literal(u'<ul class="breadcrumb">'
+            '<li><a href="/">HOME</a><span class="divider">/</span></li>'
+            '<li class="active">Projects</li>'
+            '</ul>'))
+
+class GridTests(unittest.TestCase):
+    def _callFUT(self, *args, **kwargs):
+        from .helpers import grid
+        return grid(*args, **kwargs)
+
+    def test_it(self):
+        from webhelpers.html.builder import literal
+        request = testing.DummyRequest()
+        data = [testing.DummyResource(name="dummy %d" % i, v1=i*2, v2=i+1) for i in range(2)]
+        result = self._callFUT(request, [('Name', 'name'), ('Sum', lambda o: o.v1 + o.v2)], data)
+
+        self.assertEqual(result, literal(u'<table class="table"> '
+            '<thead><tr><th>Name</th><th>Sum</th></tr></thead>'
+            '<tbody>'
+            '<tr><td>dummy 0</td><td>1</td></tr>'
+            '<tr><td>dummy 1</td><td>4</td></tr>'
+            '</tbody>'
+            '</table>'))
+
+class RenderViewletTests(unittest.TestCase):
+
+    def setUp(self):
+        self.config = testing.setUp()
+
+    def tearDown(self):
+        testing.tearDown()
+
+    def _callFUT(self, *args, **kwargs):
+        from .helpers import render_viewlet
+        return render_viewlet(*args, **kwargs)
+
+    def test_it(self):
+        from pyramid.response import Response
+        from .models import ShirlyResource
+        def dummy_view(request):
+            request.response.text = u'OK'
+            return request.response
+
+        self.config.add_view(dummy_view, context=ShirlyResource, name="dummy-viewlet")
+        request = testing.DummyRequest(response=Response(), registry=self.config.registry)
+        resource = ShirlyResource(request)
+        request.context = resource
+        
+        result = self._callFUT(request, "dummy-viewlet")
+        self.assertEqual(result, u'OK')
+

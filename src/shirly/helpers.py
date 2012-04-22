@@ -20,17 +20,14 @@ def breadcrumb(seq):
     html.append('</ul>')
     return literal("".join(html))
 
-def member_list(request):
-    res = render_view_to_response(request.context, request, name='member_list')
+def render_viewlet(request, name):
+    res = render_view_to_response(request.context, request, name=name)
     return res.text
 
-def ticket_list(request):
-    res = render_view_to_response(request.context, request, name='ticket_list')
-    return res.text
-    
-def milestone_list(request):
-    res = render_view_to_response(request.context, request, name='milestone_list')
-    return res.text
+member_list = partial(render_viewlet, name="member_list")
+ticket_list = partial(render_viewlet, name="ticket_list")
+milestone_list = partial(render_viewlet, name="milestone_list")
+
 
 def project_url(request, project):
     return request.route_url('project', project_name=project.project_name)
@@ -56,7 +53,7 @@ def grid(request, columns, data):
     html.extend([
         '</tr>',
         '</thead>',
-        '</tbody>',
+        '<tbody>',
     ])
 
     for d in data:
