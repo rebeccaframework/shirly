@@ -11,6 +11,7 @@ from .security import authenticate
 from . import schemas as s
 from . import models as m
 from .forms import FormRenderer
+from . import helpers as h
 
 @view_config(route_name='top', permission="viewer", renderer="shirly:templates/index.mak")
 def index(request):
@@ -82,28 +83,26 @@ class TicketView(object):
     def __init__(self, request):
         self.request = request
         self.context = request.context
+        jquery.need()
+        jqueryui.need()
+        tinymce.need()
 
     @view_config(route_name="project_tickets", renderer="shirly:templates/tickets.mak")
     def collection_get(self):
         project = self.context.project
         tickets = sorted(project.tickets.values(), key=lambda t: t.ticket_no)
         logging.debug(project.tickets)
-        # return dict(project_name=project.project_name,
-        #     tickets=[dict(ticket_no=t.ticket_no,
-        #     ticket_name=t.ticket_name,
-        #     status=t.status,
-        #     owner_name=t.owner_name,
-        #     reporter_name=t.reporter_name,
-        #     description=t.description) 
-        #     for t in project.tickets.values()])
         return dict(project=project, tickets=tickets)
 
     @view_config(route_name="project_ticket", request_method="GET", renderer="shirly:templates/ticket.mak")
     def member_get(self):
         project = self.context.project
         t = self.context.ticket
+        form = Form(self.request, schema=s.TicketSchema, obj=t)
 
-        return dict(project_name=project.project_name,
+        return dict(renderer=FormRenderer(form),
+            project_name=project.project_name,
+            ticket=t,
             members=[(u.id, u.user_name) for u in project.users.values()],
             ticket_no=t.ticket_no,
             ticket_name=t.ticket_name,
@@ -114,6 +113,14 @@ class TicketView(object):
             reporter=t.reporter)
 
 
+    @view_config(route_name="project_ticket", request_method="POST", request_param="update=Update")
+    def update_ticket(self):
+        project = self.context.project
+        ticket = self.context.ticket
+        form = Form(self.request, schema=s.TicketSchema, obj=ticket)
+        if form.validate():
+            form.bind(ticket)
+            return HTTPFound(location=h.ticket_url(self.request, ticket))
     @view_config(route_name="project_ticket", request_method="POST", request_param="operation=Reopen")
     def reopen_ticket(self):
         t = self.context.ticket

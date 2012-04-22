@@ -19,5 +19,5 @@ class ProjectTests(unittest.TestCase):
         ticket = target.add_ticket(ticket)
 
         self.assertEqual(ticket.ticket_no, 1)
-        self.assertEqual(target.tickets[0], ticket)
+        self.assertEqual(target.tickets[ticket.ticket_no], ticket)
         self.assertEqual(target.ticket_counter, 1)

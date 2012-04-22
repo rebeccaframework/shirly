@@ -8,6 +8,11 @@ ${h.breadcrumb([
 "%s&nbsp;%s" % (ticket_no, ticket_name),
 ])}
 </%block>
+<%block name="extra_scripts">
+<script>
+$(function() {tinyMCE.init({mode: 'textareas', theme: 'advanced'});})
+</script>
+</%block>
 
 <h1>#${ticket_no} ${ticket_name}</h1>
 <div class="well">
@@ -18,12 +23,24 @@ ${h.breadcrumb([
 <dd>${owner_name}</dd>
 <dt>status</dt>
 <dd>${status}</dd>
+<dt>estimated time</dt>
+<dd>${ticket.estimated_time}</dd>
 </div>
 <div>
 <h2>Description</h2>
 ${description|n}
 </div>
 <div>
+
+${renderer.begin(h.ticket_url(request, ticket), class_="form-horizontal")}
+<a href="javascript:$('#ticket-form').toggle()">edit</a>
+<fieldset id="ticket-form" style="display: none;" class="well">
+${renderer.textfield('ticket_name')}
+${renderer.textfield('estimated_time')}
+${renderer.textareafield('description')}
+<input type="submit" name="update" value="Update" class="btn btn-primary" />
+</fieldset>
+${renderer.end()}
 
 <form action="${request.url}" method="POST">
 <fieldset>
