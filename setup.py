@@ -20,8 +20,6 @@ tests_require = [
     "nose",
     "webtest",
     "coverage",
-    "tox",
-    "mock",
 ]
 
 points = {
@@ -37,7 +35,7 @@ setup(
     extras_require={
         "testing": tests_require,
         "docs": ["sphinx"],
-        "dev": ["alembic"],
+        "dev": ["alembic", "tox"],
         "mysql": ["pymysql"],
     },
     test_suite="shirly",
