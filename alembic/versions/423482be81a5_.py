@@ -24,8 +24,8 @@ def upgrade():
     sa.Column('ticket_name', sa.Unicode(length=255), nullable=True),
     sa.Column('description', sa.UnicodeText(), nullable=True),
     sa.Column('estimated_time', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['member_id'], ['members.id'], ),
-    sa.ForeignKeyConstraint(['project_id'], ['projects.id'], ),
+    sa.ForeignKeyConstraint(['member_id'], ['members.id'], name="fk_member_id"),
+    sa.ForeignKeyConstraint(['project_id'], ['projects.id'], name="fk_project_id"),
     sa.PrimaryKeyConstraint('id')
     )
     op.add_column(u'projects', sa.Column('ticket_counter', sa.Integer(), nullable=True, default=0))
