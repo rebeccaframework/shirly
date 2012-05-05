@@ -1,0 +1,3 @@
+DROP DATABASE IF EXISTS shirly;
+CREATE DATABASE shirly DEFAULT CHARACTER SET utf8;
+GRANT ALL ON shirly.* TO shirly@localhost IDENTIFIED BY 'shirly';
