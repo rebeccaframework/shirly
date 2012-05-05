@@ -14,6 +14,8 @@ requires = [
     "js.jqueryui",
     "js.tinymce",
     "js.bootstrap",
+    "cliff",
+    "pymysql",
 ]
 
 tests_require = [
@@ -24,7 +26,10 @@ tests_require = [
 
 points = {
     'console_scripts': [
-        'add_user=shirly.scripts:add_user',
+        'shirly=shirly.scripts:main',
+    ],
+    'shirly.command': [
+        'adduser=shirly.scripts:AddUserCommand',
     ],
 }
 
@@ -36,7 +41,6 @@ setup(
         "testing": tests_require,
         "docs": ["sphinx"],
         "dev": ["alembic", "tox"],
-        "mysql": ["pymysql"],
     },
     test_suite="shirly",
     package_dir={"": "src"},
