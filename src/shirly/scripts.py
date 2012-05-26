@@ -37,7 +37,7 @@ class ShirlyApp(App):
             command_manager=CommandManager('shirly.command'),
         )
 
-    def initialize_app(self):
+    def initialize_app(self, args):
         self.log.debug('initialize app')
 
     def prepare_to_run_command(self, command):

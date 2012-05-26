@@ -14,7 +14,7 @@ requires = [
     "js.jqueryui",
     "js.tinymce",
     "js.bootstrap",
-    "cliff",
+    "cliff>=0.7",
     "pymysql",
 ]
 
